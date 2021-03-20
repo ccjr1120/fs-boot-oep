@@ -1,0 +1,97 @@
+//我的idea根据数据表生成实体类的配置文件
+import com.intellij.database.model.DasTable
+import com.intellij.database.util.Case
+import com.intellij.database.util.DasUtil
+import java.time.LocalDateTime
+import java.util.*;
+
+import java.text.SimpleDateFormat;
+/*
+ * Available context bindings:
+ *   SELECTION   Iterable<DasObject>
+ *   PROJECT     project
+ *   FILES       files helper
+ */
+
+typeMapping = [    // 此处指定对应的类型映射，如下：数据库中bigint对应生成java的Long，int|tinyint生成Integer...
+                   (~/(?i)bigint/)                      : "Long",
+                   (~/(?i)int/)                 : "Integer",
+                   (~/(?i)tinyint/)                 : "Boolean",
+                   (~/(?i)float|double|decimal|real/): "java.math.BigDecimal",
+                   (~/(?i)date|datetime|timestamp/)       : "LocalDateTime",
+                   (~/(?i)time/)                     : "LocalTime",
+                   (~/(?i)/)                         : "String"
+]
+
+FILES.chooseDirectoryAndSave("Choose directory", "Choose where to store generated files") { dir ->
+    SELECTION.filter { it instanceof DasTable }.each { generate(it, dir) }
+}
+
+def generate(table, dir) {
+    def className = javaName(table.getName(), true)
+    def fields = calcFields(table)
+    new PrintWriter(new OutputStreamWriter(new FileOutputStream( new File(dir, className + ".java")), "utf-8")).withPrintWriter { out -> generate(out, className, fields) }
+}
+
+def generate(out, className, fields) {
+    //获取当前日期并格式化
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd hh:mm ")
+    String currTime = sdf.format(new Date())
+    out.println "package com.boot.oep.model;"
+    out.println ""
+    out.println ""
+    out.println "import com.boot.oep.model.BaseEntity;"
+    out.println "import lombok.Data;"
+    out.println "import lombok.EqualsAndHashCode;"
+    out.println "import java.time.LocalDateTime;"
+    out.println ""
+    out.println "/**"
+    out.println "* @author ccjr"
+    out.println "* @date $currTime"
+    out.println "*/"
+    out.println "@Data"
+    out.println "@EqualsAndHashCode(callSuper = true)"
+    out.println "public class $className extends BaseEntity {"
+    out.println ""
+    fields.each() {   // 遍历字段，按下面的规则生成
+        //对这些字段不做处理，已在BaseEntity中声明
+        def insertFillCols = ['createId','createTime']
+        def updateFillCols = ['updateId', 'updateTime']
+        if(!insertFillCols.contains(it.name) && !updateFillCols.contains(it.name) && "delFlag" != it.name){
+            if (isNotEmpty(it.commoent)) {
+                out.println "\t/**"
+                out.println "\t * ${it.commoent}"
+                out.println "\t */"
+            }
+            if (it.annos != "") out.println "  ${it.annos}"
+            out.println "\tprivate ${it.type} ${it.name};"
+            out.println ""
+        }
+    }
+    out.println ""
+    out.println "}"
+}
+
+def calcFields(table) {
+    DasUtil.getColumns(table).reduce([]) { fields, col ->
+        def spec = Case.LOWER.apply(col.getDataType().getSpecification())
+        def typeStr = typeMapping.find { p, t -> p.matcher(spec).find() }.value
+        fields += [[
+                           name : javaName(col.getName(), false),
+                           type : typeStr,
+                           commoent: col.getComment(),
+                           annos: ""]]
+    }
+}
+
+def isNotEmpty(content) {
+    return content != null && content.toString().trim().length() > 0
+}
+
+def javaName(str, capitalize) {
+    def s = com.intellij.psi.codeStyle.NameUtil.splitNameIntoWords(str)
+            .collect { Case.LOWER.apply(it).capitalize() }
+            .join("")
+            .replaceAll(/[^\p{javaJavaIdentifierPart}[_]]/, "_")
+    capitalize || s.length() == 1? s : Case.LOWER.apply(s[0]) + s[1..-1]
+}
