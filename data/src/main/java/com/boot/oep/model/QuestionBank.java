@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class QuesBank extends BaseEntity {
+public class QuestionBank extends BaseEntity {
 
 	private String id;
 
