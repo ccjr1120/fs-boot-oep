@@ -1,5 +1,7 @@
 package com.boot.oep.security;
 
+import com.boot.oep.result.ApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -38,9 +40,42 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        //暂时允许所有路径都可被访问
         http.cors().and().csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/**").permitAll();
+                .antMatchers("/teacher/**").hasAnyRole("TEACHER", "ADMIN")
+                .antMatchers("/student/**").hasAnyRole("STUDENT", "ADMIN")
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated().and()
+                .formLogin()
+                .loginProcessingUrl("/login")
+                .successHandler((httpServletRequest, httpServletResponse, authentication) -> {
+                    httpServletResponse.setHeader("Content-Type", "application/json;charset=utf-8");
+                    httpServletResponse.getWriter().print(new ObjectMapper().writeValueAsString(ApiResponse.ok("登录成功")));
+                    httpServletResponse.getWriter().flush();
+                })
+                .failureHandler((httpServletRequest, httpServletResponse, e) -> {
+                    httpServletResponse.setHeader("Content-Type", "application/json;charset=utf-8");
+                    httpServletResponse.getWriter().print(new ObjectMapper().writeValueAsString(ApiResponse.fail("登录失败:" + e.getMessage())));
+                    httpServletResponse.getWriter().flush();
+                })
+                .permitAll()
+                .and()
+                .logout().logoutUrl("/logout")
+                .logoutSuccessHandler((httpServletRequest, httpServletResponse, authentication) -> {
+                    httpServletResponse.setHeader("Content-Type", "application/json;charset=utf-8");
+                    httpServletResponse.getWriter().print(new ObjectMapper().writeValueAsString(ApiResponse.ok("注销成功")));
+                    httpServletResponse.getWriter().flush();
+                })
+                .and()
+                .exceptionHandling().authenticationEntryPoint((httpServletRequest, httpServletResponse, e) -> {
+            httpServletResponse.setHeader("Content-Type", "application/json;charset=utf-8");
+            httpServletResponse.getWriter().print(new ObjectMapper().writeValueAsString(ApiResponse.fail("用户未登录!")));
+            httpServletResponse.getWriter().flush();
+        })
+                .accessDeniedHandler((httpServletRequest, httpServletResponse, e) -> {
+                    httpServletResponse.setHeader("Content-Type", "application/json;charset=utf-8");
+                    httpServletResponse.getWriter().print(new ObjectMapper().writeValueAsString(ApiResponse.fail("你没有足够的权限!")));
+                    httpServletResponse.getWriter().flush();
+                });
     }
 }

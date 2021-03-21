@@ -35,8 +35,6 @@ public class SysUser extends BaseEntity {
 	 * 由于用户角色不多，选择在代码的枚举类中体现,不单独建表。1：学生，2:老师, 3:管理员
 	 */
 	private Integer userType;
-
-	private LocalDateTime creatteTime;
-
+	private String avatarUrl;
 
 }
