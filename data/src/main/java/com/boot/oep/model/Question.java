@@ -17,9 +17,9 @@ public class Question extends BaseEntity {
 	private String id;
 
 	/**
-	 * 模板
+	 * 题库id
 	 */
-	private String templateId;
+	private String bankId;
 
 	/**
 	 * 题目
