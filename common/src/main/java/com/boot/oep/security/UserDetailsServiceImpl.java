@@ -21,8 +21,7 @@ import java.util.Set;
  * @author ccjr
  * @date 2021/3/20 10:38 上午
  */
-@Slf4j
-@Service
+@Component
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final SysUserService sysUserService;
