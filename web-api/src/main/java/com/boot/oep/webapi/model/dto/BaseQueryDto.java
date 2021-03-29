@@ -14,5 +14,5 @@ public class BaseQueryDto {
     @NotNull(message = "页数不能为空")
     private Integer current;
     @NotNull(message = "页大小不能为空")
-    private Integer size;
+    private Integer pageSize;
 }

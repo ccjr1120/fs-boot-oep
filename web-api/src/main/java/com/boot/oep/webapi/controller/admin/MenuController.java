@@ -1,5 +1,6 @@
 package com.boot.oep.webapi.controller.admin;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -30,10 +31,13 @@ public class MenuController {
 
     @PostMapping("/list")
     public ApiResponse<IPage<SysMenu>> listMenu(@RequestBody @Valid MenuQueryDto dto){
-        IPage<SysMenu> page = new Page<>(dto.getCurrent(), dto.getSize());
-        return ApiResponse.ok(sysMenuService.page(page,
-                new QueryWrapper<SysMenu>().like("name", dto.getQueryStr())
-                    .or().like("path", dto.getQueryStr())));
+        IPage<SysMenu> page = new Page<>(dto.getCurrent(), dto.getPageSize());
+        QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
+        if (StrUtil.isNotBlank(dto.getQueryStr())){
+            queryWrapper.like("name", dto.getQueryStr())
+                    .or().like("path", dto.getQueryStr());
+        }
+        return ApiResponse.ok(sysMenuService.page(page, queryWrapper));
     }
 
 }
