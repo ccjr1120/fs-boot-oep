@@ -4,10 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.boot.oep.model.Question;
 import com.boot.oep.model.QuestionBank;
 import com.boot.oep.result.ApiResponse;
-import com.boot.oep.utils.Utils;
 import com.boot.oep.webapi.service.QuestionBankService;
 import com.boot.oep.webapi.service.QuestionService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +35,6 @@ public class QuestionBankController {
     public ApiResponse<String> add(@RequestParam("bankName") String bankName){
         //这里应该做一下处理，当前用户下的题库名不能重复
         QuestionBank questionBank = new QuestionBank();
-        questionBank.setId(Utils.getUuId());
         questionBank.setBankName(bankName);
         questionBankService.save(questionBank);
         return ApiResponse.ok();

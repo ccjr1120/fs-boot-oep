@@ -1,11 +1,15 @@
 package com.boot.oep.webapi.controller.admin;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boot.oep.model.SysMenu;
 import com.boot.oep.result.ApiResponse;
+import com.boot.oep.webapi.model.dto.MenuDTO;
 import com.boot.oep.webapi.model.dto.MenuQueryDto;
 import com.boot.oep.webapi.service.SysMenuService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * @author ccjr
@@ -38,6 +43,47 @@ public class MenuController {
                     .or().like("path", dto.getQueryStr());
         }
         return ApiResponse.ok(sysMenuService.page(page, queryWrapper));
+    }
+
+    @PostMapping("/listFirstMenu")
+    public ApiResponse<List<SysMenu>> listFirstMenu(){
+        QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("parent_id", "/");
+        List<SysMenu> sysMenuList = sysMenuService.list(queryWrapper);
+        return ApiResponse.ok(sysMenuList);
+    }
+
+    @PostMapping("/add")
+    public ApiResponse<String> addMenu(@RequestBody MenuDTO menuDTO){
+        System.err.println(menuDTO);
+        SysMenu sysMenu = new SysMenu();
+        BeanUtil.copyProperties(menuDTO, sysMenu);
+        SysMenu sysMenuDb = sysMenuService.getOne(
+                new LambdaQueryWrapper<SysMenu>().eq(SysMenu::getName, sysMenu.getName())
+                .or().eq(SysMenu::getPath, sysMenu.getPath()));
+        if (sysMenuDb != null){
+            return ApiResponse.fail("菜单或路径已存在");
+        }
+        sysMenu.setRoles(JSON.toJSONString(menuDTO.getRoles()));
+        sysMenuService.save(sysMenu);
+        return ApiResponse.ok();
+    }
+
+    @PostMapping("/update")
+    public ApiResponse<String> updateOne(@RequestBody MenuDTO menuDTO){
+        SysMenu sysMenu = sysMenuService.getById(menuDTO.getId());
+        if (sysMenu == null){
+            return ApiResponse.fail("该菜单不存在");
+        }
+        BeanUtil.copyProperties(menuDTO, sysMenu);
+        sysMenuService.updateById(sysMenu);
+        return ApiResponse.ok();
+    }
+
+    @PostMapping("/del")
+    public ApiResponse<String> delOne(@RequestBody SysMenu sysMenu){
+        sysMenuService.removeById(sysMenu.getId());
+        return ApiResponse.ok();
     }
 
 }

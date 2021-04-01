@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.excel.EasyExcel;
 import com.boot.oep.model.Question;
 import com.boot.oep.result.ApiResponse;
-import com.boot.oep.utils.Utils;
 import com.boot.oep.utils.excel.UploadQuestionListener;
 import com.boot.oep.webapi.model.dto.QuestionDto;
 import com.boot.oep.webapi.service.QuestionBankService;
@@ -34,7 +33,6 @@ public class QuestionController {
     public ApiResponse<String> addOne(@RequestBody QuestionDto dto){
         Question question = new Question();
         BeanUtil.copyProperties(dto, question);
-        question.setId(Utils.getUuId());
         questionService.save(question);
         return ApiResponse.ok();
     }

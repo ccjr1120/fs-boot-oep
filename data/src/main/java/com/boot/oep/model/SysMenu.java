@@ -1,6 +1,8 @@
 package com.boot.oep.model;
 
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.boot.oep.model.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class SysMenu extends BaseEntity {
 
+	@TableId(type = IdType.ASSIGN_UUID)
 	private String id;
 
 	/**
