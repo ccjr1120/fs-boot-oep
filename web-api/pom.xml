@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>oep-web-api</artifactId>
+    <artifactId>web-api</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
