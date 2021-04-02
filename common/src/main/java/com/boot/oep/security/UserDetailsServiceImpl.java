@@ -37,7 +37,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("用户名或密码不正确");
         }
         Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority(UserRoleEnum.getRoleNameById(sysUser.getUserType())));
+        authorities.add(new SimpleGrantedAuthority(UserRoleEnum.getRoleNameById(sysUser.getRoleId())));
         LoginUserDetails loginUserDetails = new LoginUserDetails();
         BeanUtil.copyProperties(sysUser, loginUserDetails);
         loginUserDetails.setAuthorities(authorities);

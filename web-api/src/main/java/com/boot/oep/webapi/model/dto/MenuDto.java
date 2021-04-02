@@ -11,7 +11,7 @@ import java.util.List;
  * @date 2021/3/30 9:55 下午
  */
 @Data
-public class MenuDTO {
+public class MenuDto {
 
 
     private String id;

@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boot.oep.model.SysMenu;
 import com.boot.oep.result.ApiResponse;
-import com.boot.oep.webapi.model.dto.MenuDTO;
+import com.boot.oep.webapi.model.dto.MenuDto;
 import com.boot.oep.webapi.model.dto.MenuQueryDto;
 import com.boot.oep.webapi.service.SysMenuService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,7 +54,7 @@ public class MenuController {
     }
 
     @PostMapping("/add")
-    public ApiResponse<String> addMenu(@RequestBody MenuDTO menuDTO){
+    public ApiResponse<String> addMenu(@RequestBody MenuDto menuDTO){
         System.err.println(menuDTO);
         SysMenu sysMenu = new SysMenu();
         BeanUtil.copyProperties(menuDTO, sysMenu);
@@ -70,7 +70,7 @@ public class MenuController {
     }
 
     @PostMapping("/update")
-    public ApiResponse<String> updateOne(@RequestBody MenuDTO menuDTO){
+    public ApiResponse<String> updateOne(@RequestBody MenuDto menuDTO){
         SysMenu sysMenu = sysMenuService.getById(menuDTO.getId());
         if (sysMenu == null){
             return ApiResponse.fail("该菜单不存在");
