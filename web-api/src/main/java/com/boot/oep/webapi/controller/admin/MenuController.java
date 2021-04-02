@@ -9,16 +9,23 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boot.oep.model.SysMenu;
 import com.boot.oep.result.ApiResponse;
+import com.boot.oep.webapi.controller.BaseController;
 import com.boot.oep.webapi.model.dto.MenuDto;
 import com.boot.oep.webapi.model.dto.MenuQueryDto;
+import com.boot.oep.webapi.model.vo.SysMenuVo;
 import com.boot.oep.webapi.service.SysMenuService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * @author ccjr
@@ -26,23 +33,71 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/admin/menu")
-public class MenuController {
+public class MenuController extends BaseController {
 
     private final SysMenuService sysMenuService;
+    private static final String ROOT_KEY = "/";
 
     public MenuController(SysMenuService sysMenuService) {
         this.sysMenuService = sysMenuService;
     }
 
     @PostMapping("/list")
-    public ApiResponse<IPage<SysMenu>> listMenu(@RequestBody @Valid MenuQueryDto dto){
-        IPage<SysMenu> page = new Page<>(dto.getCurrent(), dto.getPageSize());
+    public ApiResponse<IPage<SysMenuVo>> listMenu(@RequestBody @Valid MenuQueryDto dto){
         QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
         if (StrUtil.isNotBlank(dto.getQueryStr())){
             queryWrapper.like("name", dto.getQueryStr())
                     .or().like("path", dto.getQueryStr());
         }
-        return ApiResponse.ok(sysMenuService.page(page, queryWrapper));
+        List<SysMenu> sysMenuList = sysMenuService.list(queryWrapper);
+        List<SysMenuVo> sysMenuVoList = new ArrayList<>();
+        for (SysMenu record : sysMenuList) {
+            SysMenuVo sysMenuVo = new SysMenuVo();
+            if (ROOT_KEY.equals(record.getParentId())){
+                BeanUtils.copyProperties(record, sysMenuVo);
+                sysMenuVoList.add(sysMenuVo);
+            }else{
+                boolean f = false;
+                for (SysMenuVo menuVo : sysMenuVoList) {
+                    if (menuVo.getId().equals(record.getParentId())){
+                        f = true;
+                        if (menuVo.getChildren() == null){
+                            menuVo.setChildren(new ArrayList<>());
+                        }
+                        menuVo.getChildren().add(record);
+                        break;
+                    }
+                }
+                if (!f){
+                    SysMenu sysMenu = sysMenuService.getById(record.getParentId());
+                    BeanUtils.copyProperties(sysMenu, sysMenuVo);
+                    System.err.println(2);
+                    if (sysMenuVo.getChildren() == null){
+                        System.err.println("1");
+                        sysMenuVo.setChildren(new ArrayList<>());
+                    }
+                    System.err.println(record);
+                    sysMenuVo.getChildren().add(record);
+                    System.err.println(sysMenuVo);
+                    sysMenuVoList.add(sysMenuVo);
+                }
+            }
+        }
+        sysMenuVoList = sysMenuVoList.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(SysMenu :: getId))), ArrayList::new));
+        Page<SysMenuVo> sysMenuVoPage = new Page<>();
+        sysMenuVoPage.setCurrent(dto.getCurrent());
+        sysMenuVoPage.setSize(dto.getPageSize());
+        sysMenuVoPage.setTotal(sysMenuVoList.size());
+        int start = (dto.getCurrent() - 1) * dto.getPageSize();
+        int end = (dto.getCurrent() - 1) * dto.getPageSize() + dto.getPageSize();
+        if (start >= sysMenuVoList.size()){
+            return ApiResponse.ok(new Page<>());
+        }
+        if (end >= sysMenuVoList.size()){
+            end = sysMenuVoList.size();
+        }
+        sysMenuVoPage.setRecords(sysMenuVoList.subList(start, end));
+        return ApiResponse.ok(sysMenuVoPage);
     }
 
     @PostMapping("/listFirstMenu")
@@ -55,7 +110,6 @@ public class MenuController {
 
     @PostMapping("/add")
     public ApiResponse<String> addMenu(@RequestBody MenuDto menuDTO){
-        System.err.println(menuDTO);
         SysMenu sysMenu = new SysMenu();
         BeanUtil.copyProperties(menuDTO, sysMenu);
         SysMenu sysMenuDb = sysMenuService.getOne(
@@ -82,7 +136,8 @@ public class MenuController {
 
     @PostMapping("/del")
     public ApiResponse<String> delOne(@RequestBody SysMenu sysMenu){
-        sysMenuService.removeById(sysMenu.getId());
+        sysMenuService.remove(new QueryWrapper<SysMenu>().eq("id", sysMenu.getId())
+        .or().eq("parent_id", sysMenu.getId()));
         return ApiResponse.ok();
     }
 
