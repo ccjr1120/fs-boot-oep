@@ -1,17 +1,16 @@
 package com.boot.oep.webapi.controller.tercher;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.boot.oep.model.Question;
 import com.boot.oep.model.QuestionBank;
 import com.boot.oep.result.ApiResponse;
 import com.boot.oep.webapi.controller.BaseController;
+import com.boot.oep.webapi.model.dto.QuesBankQueryDTO;
 import com.boot.oep.webapi.service.QuestionBankService;
 import com.boot.oep.webapi.service.QuestionService;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,6 +29,22 @@ public class QuestionBankController extends BaseController {
     public QuestionBankController(QuestionBankService questionBankService, QuestionService questionService) {
         this.questionBankService = questionBankService;
         this.questionService = questionService;
+    }
+
+    @PostMapping("/list")
+    public ApiResponse<List<QuestionBank>> listQuestionBank(@RequestBody QuesBankQueryDTO dto){
+        LambdaQueryWrapper<QuestionBank> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(QuestionBank::getCreateId, super.getCurId());
+        if (dto.getBankName() != null){
+            queryWrapper.eq(QuestionBank::getBankName, dto.getBankName());
+        }
+        if (dto.getStartDate() != null){
+            queryWrapper.ge(QuestionBank::getUpdateTime, dto.getStartDate());
+        }
+        if (dto.getEndDate() != null){
+            queryWrapper.le(QuestionBank::getUpdateTime, dto.getEndDate());
+        }
+        return ApiResponse.ok(questionBankService.list(queryWrapper));
     }
 
     @PostMapping("/add")
