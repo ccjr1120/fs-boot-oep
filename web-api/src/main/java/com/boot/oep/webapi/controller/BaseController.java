@@ -1,5 +1,8 @@
 package com.boot.oep.webapi.controller;
 
+import com.boot.oep.security.SecurityUserUtils;
+
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -8,5 +11,8 @@ import java.util.List;
  */
 public class BaseController {
 
+    public String getCurId(){
+        return SecurityUserUtils.getCurUser().getId();
+    }
 
 }

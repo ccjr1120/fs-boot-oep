@@ -11,12 +11,10 @@ public class QuestionDto {
     private String id;
 
     private String bankId;
-    private String question;
-    private String rightAnswer;
 
-    /**
-     * 错误答案Json存储
-     */
+    private String question;
+
+    private String rightAnswer;
     private String wrongAnswer;
 
 }

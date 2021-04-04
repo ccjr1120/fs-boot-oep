@@ -71,14 +71,10 @@ public class MenuController extends BaseController {
                 if (!f){
                     SysMenu sysMenu = sysMenuService.getById(record.getParentId());
                     BeanUtils.copyProperties(sysMenu, sysMenuVo);
-                    System.err.println(2);
                     if (sysMenuVo.getChildren() == null){
-                        System.err.println("1");
                         sysMenuVo.setChildren(new ArrayList<>());
                     }
-                    System.err.println(record);
                     sysMenuVo.getChildren().add(record);
-                    System.err.println(sysMenuVo);
                     sysMenuVoList.add(sysMenuVo);
                 }
             }

@@ -19,23 +19,19 @@ import java.util.Date;
 public class MpAutoFillConfig implements MetaObjectHandler {
     @Resource
     private HttpServletRequest request;
-    @Resource
-    private SecurityUserUtils userUtils;
 
     @Override
     public void insertFill(MetaObject metaObject) {
-        String userId = "unLogin";
         this.setFieldValByName("createTime", LocalDateTime.now(), metaObject);
         this.setFieldValByName("updateTime", LocalDateTime.now(), metaObject);
-        this.setFieldValByName("updateId", userId, metaObject);
-        this.setFieldValByName("createId", userId, metaObject);
+        this.setFieldValByName("updateId", SecurityUserUtils.getCurUser().getId(), metaObject);
+        this.setFieldValByName("createId", SecurityUserUtils.getCurUser().getId(), metaObject);
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        String userId = "unLogin";
         this.setFieldValByName("updateTime", LocalDateTime.now(),metaObject);
-        this.setFieldValByName("updateId", userId, metaObject);
+        this.setFieldValByName("updateId", SecurityUserUtils.getCurUser().getId(), metaObject);
     }
 
 }

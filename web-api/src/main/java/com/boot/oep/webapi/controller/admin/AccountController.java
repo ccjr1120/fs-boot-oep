@@ -27,7 +27,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/admin/account")
 public class AccountController {
-
+    
     @Resource
     private SysUserService sysUserService;
 
