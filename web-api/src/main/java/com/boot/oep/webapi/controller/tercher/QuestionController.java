@@ -59,7 +59,7 @@ public class QuestionController {
         return ApiResponse.ok();
     }
 
-    @PostMapping("/updateOne")
+    @PostMapping("/update")
     public ApiResponse<String> importMore(@RequestBody QuestionDto dto){
         Question question = new Question();
         BeanUtil.copyProperties(dto, question);

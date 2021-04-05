@@ -2,17 +2,21 @@ package com.boot.oep.webapi.controller.tercher;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.boot.oep.model.BaseEntity;
 import com.boot.oep.model.Question;
 import com.boot.oep.model.QuestionBank;
 import com.boot.oep.result.ApiResponse;
 import com.boot.oep.webapi.controller.BaseController;
 import com.boot.oep.webapi.model.dto.QuesBankQueryDTO;
+import com.boot.oep.webapi.model.vo.QuestionBankVo;
 import com.boot.oep.webapi.service.QuestionBankService;
 import com.boot.oep.webapi.service.QuestionService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author ccjr
@@ -32,7 +36,7 @@ public class QuestionBankController extends BaseController {
     }
 
     @PostMapping("/list")
-    public ApiResponse<List<QuestionBank>> listQuestionBank(@RequestBody QuesBankQueryDTO dto){
+    public ApiResponse<List<QuestionBankVo>> listQuestionBank(@RequestBody QuesBankQueryDTO dto){
         LambdaQueryWrapper<QuestionBank> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(QuestionBank::getCreateId, super.getCurId());
         if (dto.getBankName() != null){
@@ -44,7 +48,14 @@ public class QuestionBankController extends BaseController {
         if (dto.getEndDate() != null){
             queryWrapper.le(QuestionBank::getUpdateTime, dto.getEndDate());
         }
-        return ApiResponse.ok(questionBankService.list(queryWrapper));
+        queryWrapper.orderByDesc(BaseEntity::getUpdateTime);
+        List<QuestionBankVo> list = questionBankService.list(queryWrapper).stream().map(item->{
+          QuestionBankVo questionBankVo = new QuestionBankVo();
+          BeanUtils.copyProperties(item, questionBankVo);
+          questionBankVo.setQuestionCount(questionService.count(new QueryWrapper<Question>().eq("bank_id", item.getId())));
+          return questionBankVo;
+        }).collect(Collectors.toList());
+        return ApiResponse.ok(list);
     }
 
     @PostMapping("/add")
