@@ -2,16 +2,20 @@ package com.boot.oep.webapi.controller.tercher;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boot.oep.model.BaseEntity;
 import com.boot.oep.model.Question;
 import com.boot.oep.model.QuestionBank;
 import com.boot.oep.result.ApiResponse;
 import com.boot.oep.webapi.controller.BaseController;
+import com.boot.oep.webapi.model.dto.BaseQueryDto;
 import com.boot.oep.webapi.model.dto.QuesBankQueryDTO;
 import com.boot.oep.webapi.model.vo.QuestionBankVo;
 import com.boot.oep.webapi.service.QuestionBankService;
 import com.boot.oep.webapi.service.QuestionService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +60,16 @@ public class QuestionBankController extends BaseController {
           return questionBankVo;
         }).collect(Collectors.toList());
         return ApiResponse.ok(list);
+    }
+
+    @PostMapping("/listPage")
+    public ApiResponse<IPage<QuestionBank>> listQuestionBank(@RequestBody BaseQueryDto dto){
+        LambdaQueryWrapper<QuestionBank> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(QuestionBank::getCreateId, super.getCurId());
+        queryWrapper.gt(QuestionBank::getQuestionNumber, 0);
+        queryWrapper.orderByDesc(BaseEntity::getUpdateTime);
+        IPage<QuestionBank> iPage = new Page<>(dto.getCurrent(), dto.getPageSize());
+        return ApiResponse.ok(questionBankService.page(iPage, queryWrapper));
     }
 
     @PostMapping("/add")

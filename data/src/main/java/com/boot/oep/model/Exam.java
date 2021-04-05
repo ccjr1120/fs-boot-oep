@@ -10,21 +10,28 @@ import java.time.LocalDateTime;
 
 /**
 * @author ccjr
-* @date 2021年03月20 06:11 
+* @date 2021年04月05 09:46 
 */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class QuestionBank extends BaseEntity {
+public class Exam extends BaseEntity {
 
 	@TableId(type = IdType.ASSIGN_UUID)
 	private String id;
 
-	/**
-	 * 题库
-	 */
-	private String bankName;
+	private String randomStr;
 
-	private Integer questionNumber;
+	private String name;
+
+	private Integer minutes;
+	private Integer peopleNum;
+	private String questionIds;
+
+	private Integer partNum;
+
+	private Integer average;
+
+	private Integer state;
 
 
 }

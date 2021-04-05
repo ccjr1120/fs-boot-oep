@@ -1,4 +1,3 @@
-//我的idea根据数据表生成实体类的配置文件
 import com.intellij.database.model.DasTable
 import com.intellij.database.util.Case
 import com.intellij.database.util.DasUtil
