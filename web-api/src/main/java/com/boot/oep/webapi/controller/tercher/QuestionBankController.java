@@ -48,7 +48,7 @@ public class QuestionBankController extends BaseController {
     }
 
     @PostMapping("/add")
-    public ApiResponse<String> add(@RequestParam("bankName") String bankName){
+    public ApiResponse<QuestionBank> add(@RequestParam("bankName") String bankName){
         if (bankName == null){
             return ApiResponse.ok();
         }
@@ -60,7 +60,7 @@ public class QuestionBankController extends BaseController {
         questionBank = new QuestionBank();
         questionBank.setBankName(bankName);
         questionBankService.save(questionBank);
-        return ApiResponse.ok(questionBank.getId());
+        return ApiResponse.ok(questionBank);
     }
 
     @PostMapping("/remove")

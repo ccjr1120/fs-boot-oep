@@ -2,6 +2,7 @@ package com.boot.oep.webapi.controller.tercher;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.excel.EasyExcel;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.boot.oep.model.Question;
 import com.boot.oep.result.ApiResponse;
 import com.boot.oep.utils.excel.UploadQuestionListener;
@@ -29,9 +30,23 @@ public class QuestionController {
         this.questionService = questionService;
     }
 
+    @PostMapping("/list")
+    public ApiResponse<List<Question>> listQuestionByBankId(@RequestParam String bankId){
+        LambdaQueryWrapper<Question> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Question::getBankId, bankId);
+        return ApiResponse.ok(questionService.list(queryWrapper));
+    }
+
     @PostMapping("/add")
     public ApiResponse<String> addOne(@RequestBody QuestionDto dto){
-        Question question = new Question();
+        LambdaQueryWrapper<Question> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Question::getBankId, dto.getBankId());
+        queryWrapper.eq(Question::getTitle, dto.getTitle());
+        Question question = questionService.getOne(queryWrapper);
+        if (question != null){
+            return ApiResponse.fail("同一题库下不能出现标题重复的问题");
+        }
+        question = new Question();
         BeanUtil.copyProperties(dto, question);
         questionService.save(question);
         return ApiResponse.ok();

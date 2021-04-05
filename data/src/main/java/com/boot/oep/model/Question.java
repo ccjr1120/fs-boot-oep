@@ -27,7 +27,7 @@ public class Question extends BaseEntity {
 	/**
 	 * 题目
 	 */
-	private String question;
+	private String title;
 
 	/**
 	 * 正确答案
@@ -38,6 +38,8 @@ public class Question extends BaseEntity {
 	 * 错误答案Json存储
 	 */
 	private String wrongAnswer;
+
+	private Integer type;
 
 
 }

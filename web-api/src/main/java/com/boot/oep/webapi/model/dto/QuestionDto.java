@@ -12,8 +12,8 @@ public class QuestionDto {
 
     private String bankId;
 
-    private String question;
-
+    private String title;
+    private Integer type;
     private String rightAnswer;
     private String wrongAnswer;
 
