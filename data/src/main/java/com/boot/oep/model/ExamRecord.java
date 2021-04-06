@@ -10,34 +10,20 @@ import java.time.LocalDateTime;
 
 /**
 * @author ccjr
-* @date 2021年04月05 09:46 
+* @date 2021年4月6日 下午01:15
 */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Exam extends BaseEntity {
+public class ExamRecord extends BaseEntity {
 
 	@TableId(type = IdType.ASSIGN_UUID)
 	private String id;
 
-	private String randomStr;
+	private String bankId;
 
-	private String name;
+	private String optionList;
 
-	private Integer minutes;
-
-	private Integer peopleNum;
-	private Integer questionNum;
-
-	/**
-	 * 是否随机，决定sourceIds是questionId还是bankId
-	 */
-	private Integer isRandom;
-
-	private String sourceIds;
-
-	private Integer partNum;
-
-	private Integer average;
+	private String answers;
 
 	private Integer state;
 

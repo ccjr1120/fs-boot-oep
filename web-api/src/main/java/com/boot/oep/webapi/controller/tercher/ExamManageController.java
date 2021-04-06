@@ -63,7 +63,7 @@ public class ExamManageController {
 
     @PostMapping("/add")
     public ApiResponse<IPage<Exam>> add(@RequestBody ExamDto examDto){
-        int count = questionBankService.count(new QueryWrapper<QuestionBank>().in("id", examDto.getBankIds()));
+        int count = questionService.count(new QueryWrapper<Question>().in("bank_id", examDto.getBankIds()));
         if (count < examDto.getQuestionNum()){
             return ApiResponse.fail("所选题库没有足够多的题目");
         }
@@ -75,7 +75,7 @@ public class ExamManageController {
         }
         exam = new Exam();
         BeanUtils.copyProperties(examDto, exam);
-        if (examDto.getIsRandom() == 1) {
+        if (examDto.getIsRandom() == 0) {
             LambdaQueryWrapper<Question> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.in(Question::getBankId, examDto.getBankIds());
             lambdaQueryWrapper.last(" ORDER BY RAND() LIMIT " + examDto.getQuestionNum() + ";");
