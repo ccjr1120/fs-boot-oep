@@ -3,10 +3,12 @@ package com.boot.oep.webapi.controller.student;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.boot.oep.model.BaseEntity;
 import com.boot.oep.model.Exam;
 import com.boot.oep.model.ExamRecord;
 import com.boot.oep.model.Question;
 import com.boot.oep.result.ApiResponse;
+import com.boot.oep.webapi.controller.BaseController;
 import com.boot.oep.webapi.model.dto.AnswerItem;
 import com.boot.oep.webapi.model.dto.QuesItem;
 import com.boot.oep.webapi.model.vo.QuesItemVo;
@@ -32,7 +34,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/student/exam")
-public class ExamController {
+public class ExamController extends BaseController {
 
     @Resource
     private ExamService examService;
@@ -111,6 +113,17 @@ public class ExamController {
             quesItemVos.add(quesItemVo);
         });
         return ApiResponse.ok(quesItemVos);
+    }
+
+    @PostMapping("/checkStart")
+    public ApiResponse<String> checkStart(){
+        ExamRecord examRecord = examRecordService.getOne(new LambdaQueryWrapper<ExamRecord>()
+        .eq(BaseEntity::getCreateId, getCurId())
+        .eq(ExamRecord::getState, "0"));
+        if (examRecord == null){
+            return ApiResponse.ok();
+        }
+        return ApiResponse.ok(examRecord.getId());
     }
 
     private String getAnswerLabel(List<String> list){
