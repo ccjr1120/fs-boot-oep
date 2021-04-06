@@ -24,8 +24,15 @@ public class Exam extends BaseEntity {
 	private String name;
 
 	private Integer minutes;
+
 	private Integer peopleNum;
-	private String questionIds;
+
+	/**
+	 * 是否随机，讲觉得sourceIds是questionId还是bankId
+	 */
+	private Integer isRandom;
+
+	private String sourceIds;
 
 	private Integer partNum;
 

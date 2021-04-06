@@ -61,12 +61,16 @@ public class ExamManageController {
         }
         exam = new Exam();
         BeanUtils.copyProperties(examDto, exam);
-        LambdaQueryWrapper<Question> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.in(Question::getBankId, examDto.getBankIds());
-        lambdaQueryWrapper.last(" ORDER BY RAND() LIMIT " + examDto.getQuestionNum() + ";");
-        List<Question> questions = questionService.list(lambdaQueryWrapper);
-        List<String> qIdList = questions.stream().map(Question::getId).collect(Collectors.toList());
-        exam.setQuestionIds(JSON.toJSONString(qIdList));
+        if (examDto.getIsRandom() == 1) {
+            LambdaQueryWrapper<Question> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.in(Question::getBankId, examDto.getBankIds());
+            lambdaQueryWrapper.last(" ORDER BY RAND() LIMIT " + examDto.getQuestionNum() + ";");
+            List<Question> questions = questionService.list(lambdaQueryWrapper);
+            List<String> qIdList = questions.stream().map(Question::getId).collect(Collectors.toList());
+            exam.setSourceIds(JSON.toJSONString(qIdList));
+        }else{
+            exam.setSourceIds(JSON.toJSONString(examDto.getBankIds()));
+        }
         examService.save(exam);
         return ApiResponse.ok();
     }
