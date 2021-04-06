@@ -9,5 +9,5 @@ import lombok.Data;
 @Data
 public class AnswerItem {
     private String label;
-    private String content;
+    private String value;
 }

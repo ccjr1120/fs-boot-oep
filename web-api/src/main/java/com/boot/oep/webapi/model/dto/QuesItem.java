@@ -10,6 +10,7 @@ import java.util.List;
  */
 @Data
 public class QuesItem {
+    private String questionId;
     private String question;
     private String rightAnswer;
     private Integer type;

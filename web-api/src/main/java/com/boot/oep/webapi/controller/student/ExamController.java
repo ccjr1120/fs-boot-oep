@@ -1,6 +1,7 @@
 package com.boot.oep.webapi.controller.student;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.boot.oep.model.BaseEntity;
@@ -68,6 +69,7 @@ public class ExamController extends BaseController {
         qIdList.forEach(item->{
             QuesItem quesItem= new QuesItem();
             Question question= questionService.getById(item);
+            quesItem.setQuestionId(item);
             quesItem.setType(question.getType());
             quesItem.setQuestion(question.getTitle());
             List<AnswerItem> answerItems =new ArrayList<>();
@@ -81,18 +83,18 @@ public class ExamController extends BaseController {
             }
             for (String right : rights) {
                 AnswerItem answerItem = new AnswerItem();
-                String label = this.getAnswerLabel(list);
-                answerItem.setContent(right);
-                answerItem.setLabel(label);
-                rightStr.append(label);
+                String value = this.getAnswerLabel(list);
+                answerItem.setValue(value);
+                answerItem.setLabel(value + ". " + right);
+                rightStr.append(value);
                 answerItems.add(answerItem);
             }
             quesItem.setRightAnswer(rightStr.toString());
             for (String wrong : wrongs) {
                 AnswerItem answerItem = new AnswerItem();
-                String label = this.getAnswerLabel(list);
-                answerItem.setContent(wrong);
-                answerItem.setLabel(label);
+                String value = this.getAnswerLabel(list);
+                answerItem.setValue(value);
+                answerItem.setLabel(value + ". " + wrong);
                 answerItems.add(answerItem);
             }
             answerItems.sort(new Comparator<AnswerItem>() {
@@ -124,6 +126,17 @@ public class ExamController extends BaseController {
             return ApiResponse.ok();
         }
         return ApiResponse.ok(examRecord.getId());
+    }
+
+    @PostMapping("/continue")
+    public ApiResponse<List<QuesItemVo>> continueExam(){
+        ExamRecord examRecord = examRecordService.getOne(new LambdaQueryWrapper<ExamRecord>()
+                .eq(BaseEntity::getCreateId, getCurId())
+                .eq(ExamRecord::getState, "0"));
+        if (examRecord == null){
+            return ApiResponse.fail("获取失败");
+        }
+        return ApiResponse.ok(JSON.parseObject(examRecord.getOptionList(), new TypeReference<List<QuesItemVo>>(){}));
     }
 
     private String getAnswerLabel(List<String> list){

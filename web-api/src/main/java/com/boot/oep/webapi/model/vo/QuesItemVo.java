@@ -12,6 +12,7 @@ import java.util.List;
 @Data
 public class QuesItemVo {
 
+    private String questionId;
     private String question;
     private Integer type;
     private List<AnswerItem> answerItems;
