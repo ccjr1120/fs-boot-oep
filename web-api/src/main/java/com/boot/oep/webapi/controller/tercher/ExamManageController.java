@@ -11,6 +11,7 @@ import com.boot.oep.model.QuestionBank;
 import com.boot.oep.result.ApiResponse;
 import com.boot.oep.webapi.model.dto.ExamDto;
 import com.boot.oep.webapi.model.dto.ExamQueryDto;
+import com.boot.oep.webapi.model.dto.ExamUpdateDto;
 import com.boot.oep.webapi.service.ExamService;
 import com.boot.oep.webapi.service.QuestionBankService;
 import com.boot.oep.webapi.service.QuestionService;
@@ -43,7 +44,20 @@ public class ExamManageController {
     @PostMapping("/list")
     public ApiResponse<IPage<Exam>> listExamVo(@RequestBody ExamQueryDto queryDto){
         IPage<Exam> iPage = new Page<>(queryDto.getCurrent(), queryDto.getPageSize());
-        iPage = examService.page(iPage);
+        LambdaQueryWrapper<Exam> wrapper = new LambdaQueryWrapper<>();
+        if (queryDto.getName() != null){
+            wrapper.like(Exam::getName, queryDto.getName());
+        }
+        if (queryDto.getType() != null){
+            wrapper.eq(Exam::getState, queryDto.getType());
+        }
+        if (queryDto.getStartDate() != null){
+            wrapper.ge(Exam::getCreateTime, queryDto.getStartDate());
+        }
+        if (queryDto.getEndDate() != null){
+            wrapper.le(Exam::getCreateTime, queryDto.getEndDate());
+        }
+        iPage = examService.page(iPage, wrapper);
         return ApiResponse.ok(iPage);
     }
 
@@ -75,4 +89,11 @@ public class ExamManageController {
         return ApiResponse.ok();
     }
 
+    @PostMapping("/update")
+    public ApiResponse<String> update(@RequestBody ExamUpdateDto dto){
+        Exam exam =new Exam();
+        BeanUtils.copyProperties(dto, exam);
+        examService.updateById(exam);
+        return ApiResponse.ok();
+    }
 }
