@@ -4,12 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.boot.oep.model.BaseEntity;
-import com.boot.oep.model.Exam;
-import com.boot.oep.model.ExamRecord;
-import com.boot.oep.model.Question;
+import com.boot.oep.model.*;
 import com.boot.oep.result.ApiResponse;
 import com.boot.oep.webapi.controller.BaseController;
+import com.boot.oep.webapi.model.dto.AnswerDto;
 import com.boot.oep.webapi.model.dto.AnswerItem;
 import com.boot.oep.webapi.model.dto.QuesItem;
 import com.boot.oep.webapi.model.vo.QuesItemVo;
@@ -17,16 +15,10 @@ import com.boot.oep.webapi.service.ExamRecordService;
 import com.boot.oep.webapi.service.ExamService;
 import com.boot.oep.webapi.service.QuestionService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -137,6 +129,36 @@ public class ExamController extends BaseController {
             return ApiResponse.fail("获取失败");
         }
         return ApiResponse.ok(JSON.parseObject(examRecord.getOptionList(), new TypeReference<List<QuesItemVo>>(){}));
+    }
+
+    @PostMapping("/saveAnswer")
+    public ApiResponse<String> saveAnswer(@RequestBody AnswerDto dto){
+        ExamRecord examRecord = getMyExam();
+        Map<String, List<String>> answerMap = JSON.parseObject(examRecord.getAnswers(), new TypeReference<HashMap<String, List<String>>>(){});
+        if (answerMap == null){
+            answerMap = new HashMap<>(1);
+        }
+        answerMap.put(dto.getId(), dto.getAnswer());
+        examRecord.setAnswers(JSON.toJSONString(answerMap));
+        examRecordService.updateById(examRecord);
+        return ApiResponse.ok();
+    }
+
+    @PostMapping("/clearAnswer")
+    public ApiResponse<String> saveAnswer(@RequestParam("id") String id){
+        ExamRecord examRecord = getMyExam();
+        Map<String, List<String>> answerMap = JSON.parseObject(examRecord.getAnswers(), new TypeReference<HashMap<String, List<String>>>(){});
+        answerMap.remove(id);
+        examRecord.setAnswers(JSON.toJSONString(answerMap));
+        examRecordService.updateById(examRecord);
+        return ApiResponse.ok();
+    }
+
+    private ExamRecord getMyExam(){
+        LambdaQueryWrapper<ExamRecord> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(BaseEntity::getCreateId, getCurId())
+                .eq(ExamRecord::getState, 0);
+        return examRecordService.getOne(queryWrapper);
     }
 
     private String getAnswerLabel(List<String> list){
