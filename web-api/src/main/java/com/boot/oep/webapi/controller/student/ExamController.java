@@ -1,5 +1,6 @@
 package com.boot.oep.webapi.controller.student;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -15,6 +16,7 @@ import com.boot.oep.webapi.service.ExamRecordService;
 import com.boot.oep.webapi.service.ExamService;
 import com.boot.oep.webapi.service.QuestionService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -128,14 +130,24 @@ public class ExamController extends BaseController {
         if (examRecord == null){
             return ApiResponse.fail("获取失败");
         }
-        return ApiResponse.ok(JSON.parseObject(examRecord.getOptionList(), new TypeReference<List<QuesItemVo>>(){}));
+        List<QuesItemVo> quesItemVos = JSON.parseObject(examRecord.getOptionList(), new TypeReference<List<QuesItemVo>>(){});
+        if (StrUtil.isNotBlank(examRecord.getAnswers())){
+            Map<String, List<String>> answerMap = JSON.parseObject(examRecord.getAnswers(), new TypeReference<HashMap<String, List<String>>>() {
+            });
+            quesItemVos.forEach(quesItemVo -> {
+                quesItemVo.setMyAnswer(answerMap.get(quesItemVo.getQuestionId()));
+            });
+        }
+        return ApiResponse.ok(quesItemVos);
     }
 
     @PostMapping("/saveAnswer")
     public ApiResponse<String> saveAnswer(@RequestBody AnswerDto dto){
         ExamRecord examRecord = getMyExam();
-        Map<String, List<String>> answerMap = JSON.parseObject(examRecord.getAnswers(), new TypeReference<HashMap<String, List<String>>>(){});
-        if (answerMap == null){
+        Map<String, List<String>> answerMap;
+        if (StrUtil.isNotBlank(examRecord.getAnswers())){
+            answerMap = JSON.parseObject(examRecord.getAnswers(), new TypeReference<HashMap<String, List<String>>>(){});
+        }else{
             answerMap = new HashMap<>(1);
         }
         answerMap.put(dto.getId(), dto.getAnswer());

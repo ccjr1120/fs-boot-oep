@@ -16,5 +16,5 @@ public class QuesItemVo {
     private String question;
     private Integer type;
     private List<AnswerItem> answerItems;
-
+    private List<String> myAnswer;
 }
