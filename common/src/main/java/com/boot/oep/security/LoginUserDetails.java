@@ -15,6 +15,7 @@ import java.util.Set;
 public class LoginUserDetails implements UserDetails {
 
     private String id;
+    private Integer roleId;
     private String name;
     private String username;
     private String password;

@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 public class MenuController extends BaseController {
 
     private final SysMenuService sysMenuService;
-    private static final String ROOT_KEY = "/";
 
     public MenuController(SysMenuService sysMenuService) {
         this.sysMenuService = sysMenuService;

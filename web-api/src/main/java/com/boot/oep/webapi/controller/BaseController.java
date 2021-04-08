@@ -11,6 +11,9 @@ import java.util.List;
  */
 public class BaseController {
 
+    public static final String ROOT_KEY = "/";
+
+
     public String getCurId(){
         return SecurityUserUtils.getCurUser().getId();
     }
