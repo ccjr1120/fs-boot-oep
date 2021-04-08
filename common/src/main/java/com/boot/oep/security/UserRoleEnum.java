@@ -11,9 +11,9 @@ public enum UserRoleEnum {
     /**
      * 用户权限
      */
-    STUDENT(1, "ROLE_STUDENT"),
-    TEACHER(2, "ROLE_TEACHER"),
-    ADMIN(3, "ROLE_ADMIN");
+    STUDENT(0, "ROLE_STUDENT"),
+    TEACHER(1, "ROLE_TEACHER"),
+    ADMIN(2, "ROLE_ADMIN");
 
     @Getter
     @Setter
