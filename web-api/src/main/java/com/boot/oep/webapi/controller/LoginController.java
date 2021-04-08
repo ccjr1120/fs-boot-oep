@@ -12,15 +12,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/user")
 public class LoginController {
 
-    @RequestMapping("/login")
-    public ApiResponse<String> login(){
-        return ApiResponse.ok();
-    }
-
-    @RequestMapping("/logout")
-    public ApiResponse<String> logout(){
-        return ApiResponse.ok();
-    }
-
 
 }

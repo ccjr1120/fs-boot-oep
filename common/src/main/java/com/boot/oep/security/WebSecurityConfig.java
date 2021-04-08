@@ -40,16 +40,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()
                 .authorizeRequests()
-//                .antMatchers("/teacher/**").hasAnyRole("TEACHER", "ADMIN")
-//                .antMatchers("/student/**").hasAnyRole("STUDENT", "ADMIN")
-//                .antMatchers("/admin/**").hasRole("ADMIN")
-//                .anyRequest().authenticated().and()
-                .anyRequest().permitAll().and()
+                .antMatchers("/teacher/**").hasAnyRole("TEACHER", "ADMIN")
+                .antMatchers("/student/**").hasAnyRole("STUDENT", "ADMIN")
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated().and()
                 .formLogin()
                 .loginProcessingUrl("/login")
                 .successHandler((httpServletRequest, httpServletResponse, authentication) -> {
                     httpServletResponse.setHeader("Content-Type", "application/json;charset=utf-8");
-                    httpServletResponse.getWriter().print(new ObjectMapper().writeValueAsString(ApiResponse.ok("登录成功")));
+                    httpServletResponse.getWriter().print(new ObjectMapper().writeValueAsString(ApiResponse.ok(SecurityUserUtils.getCurUser())));
                     httpServletResponse.getWriter().flush();
                 })
                 .failureHandler((httpServletRequest, httpServletResponse, e) -> {
@@ -68,7 +67,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .exceptionHandling().authenticationEntryPoint((httpServletRequest, httpServletResponse, e) -> {
             httpServletResponse.setHeader("Content-Type", "application/json;charset=utf-8");
-            httpServletResponse.getWriter().print(new ObjectMapper().writeValueAsString(ApiResponse.fail("用户未登录!")));
+            httpServletResponse.getWriter().print(new ObjectMapper().writeValueAsString(ApiResponse.fail("匿名用户!")));
             httpServletResponse.getWriter().flush();
         })
                 .accessDeniedHandler((httpServletRequest, httpServletResponse, e) -> {
