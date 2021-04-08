@@ -84,6 +84,7 @@ public class MenuController extends BaseController {
         sysMenuVoPage.setCurrent(dto.getCurrent());
         sysMenuVoPage.setSize(dto.getPageSize());
         sysMenuVoPage.setTotal(sysMenuVoList.size());
+        sysMenuVoList.sort((x, y)->x.getSort().compareTo(y.getSort()));
         int start = (dto.getCurrent() - 1) * dto.getPageSize();
         int end = (dto.getCurrent() - 1) * dto.getPageSize() + dto.getPageSize();
         if (start >= sysMenuVoList.size()){
@@ -107,6 +108,7 @@ public class MenuController extends BaseController {
     @PostMapping("/add")
     public ApiResponse<String> addMenu(@RequestBody MenuDto menuDTO){
         SysMenu sysMenu = new SysMenu();
+        menuDTO.setPath("/app" + menuDTO.getPath());
         BeanUtil.copyProperties(menuDTO, sysMenu);
         SysMenu sysMenuDb = sysMenuService.getOne(
                 new LambdaQueryWrapper<SysMenu>().eq(SysMenu::getName, sysMenu.getName())

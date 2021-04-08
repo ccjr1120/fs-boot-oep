@@ -26,6 +26,8 @@ public class MenuDto {
      */
     private String path;
 
+    private Integer sort;
+
     /**
      * 权限列表
      */

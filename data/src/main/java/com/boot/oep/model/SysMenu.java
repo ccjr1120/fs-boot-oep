@@ -28,7 +28,7 @@ public class SysMenu extends BaseEntity {
 	 * 路由地址(前端)
 	 */
 	private String path;
-
+	private Integer sort;
 	/**
 	 * 权限列表
 	 */
