@@ -156,6 +156,14 @@ public class ExamController extends BaseController {
         return ApiResponse.ok();
     }
 
+    @PostMapping("/done")
+    public ApiResponse<String> doneAnswer(){
+        ExamRecord examRecord = getMyExam();
+        examRecord.setState(1);
+        examRecordService.updateById(examRecord);
+        return ApiResponse.ok();
+    }
+
     @PostMapping("/clearAnswer")
     public ApiResponse<String> saveAnswer(@RequestParam("id") String id){
         ExamRecord examRecord = getMyExam();
