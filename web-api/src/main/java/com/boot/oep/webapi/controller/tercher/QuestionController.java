@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.boot.oep.model.Question;
 import com.boot.oep.model.QuestionBank;
 import com.boot.oep.result.ApiResponse;
-import com.boot.oep.utils.excel.UploadQuestionListener;
+import com.boot.oep.webapi.excel.UploadQuestionListener;
 import com.boot.oep.webapi.model.dto.QuestionDto;
 import com.boot.oep.webapi.service.QuestionBankService;
 import com.boot.oep.webapi.service.QuestionService;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -61,11 +62,9 @@ public class QuestionController {
         return ApiResponse.ok();
     }
 
-    @PostMapping("/upload")
-    public ApiResponse<String> uploadQuestions(@RequestParam("file") MultipartFile file) throws IOException {
-        //读取excel，并且在监听器里处理
-        EasyExcel.read(file.getInputStream(), new UploadQuestionListener()).sheet().doRead();
-        return ApiResponse.ok();
+    @PostMapping("/excel")
+    public void excel(@RequestParam("file") MultipartFile file, @RequestParam("bankId") String bankId,  HttpServletResponse response) throws IOException {
+        EasyExcel.read(file.getInputStream(), new UploadQuestionListener(response, questionService, questionBankService, bankId)).sheet().doRead();
     }
 
     @PostMapping("/update")

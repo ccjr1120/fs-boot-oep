@@ -69,7 +69,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .exceptionHandling().authenticationEntryPoint((httpServletRequest, httpServletResponse, e) -> {
             httpServletResponse.setHeader("Content-Type", "application/json;charset=utf-8");
-            httpServletResponse.getWriter().print(new ObjectMapper().writeValueAsString(ApiResponse.fail("匿名用户!")));
+            httpServletResponse.getWriter().print(new ObjectMapper().writeValueAsString(ApiResponse.fail(233,"匿名用户!")));
             httpServletResponse.getWriter().flush();
         })
                 .accessDeniedHandler((httpServletRequest, httpServletResponse, e) -> {

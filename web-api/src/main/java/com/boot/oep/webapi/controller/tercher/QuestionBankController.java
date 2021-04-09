@@ -15,7 +15,6 @@ import com.boot.oep.webapi.model.vo.QuestionBankVo;
 import com.boot.oep.webapi.service.QuestionBankService;
 import com.boot.oep.webapi.service.QuestionService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
