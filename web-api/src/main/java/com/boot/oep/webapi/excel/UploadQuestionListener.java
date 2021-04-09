@@ -101,6 +101,9 @@ public class UploadQuestionListener extends AnalysisEventListener<Map<Integer, S
                     }
                 }
                 questionService.save(question);
+                QuestionBank questionBank = questionBankService.getById(bankId);
+                questionBank.setQuestionNumber(questionBank.getQuestionNumber() + 1);
+                questionBankService.updateById(questionBank);
                 importResultVo.setSuccessNum(importResultVo.getSuccessNum() + 1);
             }else{
                 ImportResultVo.FailItem failItem = new ImportResultVo.FailItem();

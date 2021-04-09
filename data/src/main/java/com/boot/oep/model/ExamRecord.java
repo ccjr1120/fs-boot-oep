@@ -27,5 +27,7 @@ public class ExamRecord extends BaseEntity {
 
 	private Integer state;
 
+	private Integer examResult;
+
 
 }

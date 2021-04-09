@@ -157,11 +157,33 @@ public class ExamController extends BaseController {
     }
 
     @PostMapping("/done")
-    public ApiResponse<String> doneAnswer(){
+    public ApiResponse<Integer> doneAnswer(){
         ExamRecord examRecord = getMyExam();
         examRecord.setState(1);
         examRecordService.updateById(examRecord);
-        return ApiResponse.ok();
+        Map<String, List<String>> answerMap = JSON.parseObject(examRecord.getAnswers(), new TypeReference<Map<String, List<String>>>(){});
+        List<QuesItem> quesItems = JSON.parseObject(examRecord.getOptionList(), new TypeReference<List<QuesItem>>(){});
+        int sum = 0;
+        for (QuesItem quesItem : quesItems) {
+            boolean flag = true;
+            String right = quesItem.getRightAnswer();
+            List<String> answers = answerMap.get(quesItem.getQuestionId());
+            if (answers == null){
+                continue;
+            }
+            for (String answer : answers) {
+                if (!right.contains(answer)) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                sum++;
+            }
+        }
+        examRecord.setExamResult(100/quesItems.size()*sum);
+        examRecordService.updateById(examRecord);
+        return ApiResponse.ok(examRecord.getExamResult());
     }
 
     @PostMapping("/clearAnswer")
