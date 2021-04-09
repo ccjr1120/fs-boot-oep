@@ -194,6 +194,9 @@ public class ExamController extends BaseController {
         if (quesItems.size() != 0) {
             examRecord.setExamResult(100 / quesItems.size() * sum);
         }
+        if (quesItems.size() == sum){
+            examRecord.setExamResult(100);
+        }
         examRecordService.updateById(examRecord);
         return ApiResponse.ok(examRecord.getExamResult());
     }

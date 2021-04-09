@@ -1,17 +1,18 @@
 package com.boot.oep.webapi.controller.tercher;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.boot.oep.model.Exam;
-import com.boot.oep.model.Question;
-import com.boot.oep.model.QuestionBank;
+import com.boot.oep.model.*;
 import com.boot.oep.result.ApiResponse;
-import com.boot.oep.webapi.model.dto.ExamDto;
-import com.boot.oep.webapi.model.dto.ExamQueryDto;
-import com.boot.oep.webapi.model.dto.ExamUpdateDto;
+import com.boot.oep.service.SysUserService;
+import com.boot.oep.webapi.controller.BaseController;
+import com.boot.oep.webapi.model.dto.*;
+import com.boot.oep.webapi.model.vo.MyExamVo;
+import com.boot.oep.webapi.service.ExamRecordService;
 import com.boot.oep.webapi.service.ExamService;
 import com.boot.oep.webapi.service.QuestionBankService;
 import com.boot.oep.webapi.service.QuestionService;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -32,7 +34,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/teacher/exam")
-public class ExamManageController {
+public class ExamManageController extends BaseController {
 
     @Resource
     private ExamService examService;
@@ -40,6 +42,10 @@ public class ExamManageController {
     private QuestionBankService questionBankService;
     @Resource
     private QuestionService questionService;
+    @Resource
+    private ExamRecordService examRecordService;
+    @Resource
+    private SysUserService sysUserService;
 
     @PostMapping("/list")
     public ApiResponse<IPage<Exam>> listExamVo(@RequestBody ExamQueryDto queryDto){
@@ -95,5 +101,49 @@ public class ExamManageController {
         BeanUtils.copyProperties(dto, exam);
         examService.updateById(exam);
         return ApiResponse.ok();
+    }
+
+    @PostMapping("/listRecord")
+    public ApiResponse<IPage<MyExamVo>> listRecord(@RequestBody ExamRecordDto recordDto){
+        IPage<ExamRecord> iPage = new Page<>(recordDto.getCurrent(), recordDto.getPageSize());
+        iPage = examRecordService.page(iPage, new LambdaQueryWrapper<ExamRecord>()
+                .eq(ExamRecord::getBankId, recordDto.getExamId())
+                .eq(ExamRecord::getState, 1));
+        return ApiResponse.ok(iPage.convert(item->{
+            SysUser sysUser = sysUserService.getById(item.getCreateId());
+            MyExamVo myExamVo = new MyExamVo();
+            myExamVo.setId(item.getId());
+            Exam exam = examService.getById(item.getBankId());
+            myExamVo.setSysUsername(sysUser.getUsername());
+            myExamVo.setExamName(exam.getName());
+            myExamVo.setGrade(item.getExamResult());
+            myExamVo.setCreateTime(item.getCreateTime());
+            myExamVo.setUpdateTime(item.getUpdateTime());
+            myExamVo.setQuestionNum(exam.getQuestionNum());
+            List<QuesItem> quesItems = JSON.parseObject(item.getOptionList(), new TypeReference<List<QuesItem>>(){});
+            Map<String, List<String>> answerMap = JSON.parseObject(item.getAnswers(), new TypeReference<Map<String, List<String>>>(){});
+            int wrongSum = 0;
+            for (QuesItem quesItem : quesItems) {
+                String right = quesItem.getRightAnswer();
+                if (answerMap == null){
+                    wrongSum = quesItems.size();
+                    break;
+                }
+                List<String> answers = answerMap.get(quesItem.getQuestionId());
+                if (answers == null){
+                    wrongSum++;
+                    continue;
+                }
+                for (String answer : answers) {
+                    if (!right.contains(answer)) {
+                        wrongSum++;
+                        break;
+                    }
+                }
+            }
+            myExamVo.setQuestionNum(quesItems.size());
+            myExamVo.setWrongNum(wrongSum);
+            return myExamVo;
+        }));
     }
 }

@@ -14,6 +14,7 @@ public class MyExamVo {
 
     private String id;
     private String examName;
+    private String sysUsername;
     private Integer grade;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createTime;
