@@ -47,12 +47,17 @@ public class ExamController extends BaseController {
         if (exam.getState() == 1){
             return ApiResponse.fail("该考试已结束");
         }
-        ExamRecord examRecord = new ExamRecord();
+        ExamRecord examRecord = examRecordService.getOne(new LambdaQueryWrapper<ExamRecord>()
+        .eq(BaseEntity::getCreateId, getCurId()).eq(ExamRecord::getBankId, exam.getId()));
+        if (examRecord != null){
+            return ApiResponse.fail("你已经参与过该场考试了");
+        }
+        examRecord = new ExamRecord();
         examRecord.setBankId(exam.getId());
         List<String> qIdList;
         if (exam.getIsRandom() == 1){
             LambdaQueryWrapper<Question> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.in(Question::getBankId, exam.getSourceIds());
+            lambdaQueryWrapper.in(Question::getBankId, JSON.parseArray(exam.getSourceIds()));
             lambdaQueryWrapper.last(" ORDER BY RAND() LIMIT " + exam.getQuestionNum() + ";");
             List<Question> questions = questionService.list(lambdaQueryWrapper);
             qIdList = questions.stream().map(Question::getId).collect(Collectors.toList());
@@ -108,6 +113,8 @@ public class ExamController extends BaseController {
             BeanUtils.copyProperties(item, quesItemVo);
             quesItemVos.add(quesItemVo);
         });
+        exam.setPartNum(exam.getPartNum() + 1);
+        examService.updateById(exam);
         return ApiResponse.ok(quesItemVos);
     }
 
@@ -164,6 +171,9 @@ public class ExamController extends BaseController {
         Map<String, List<String>> answerMap = JSON.parseObject(examRecord.getAnswers(), new TypeReference<Map<String, List<String>>>(){});
         List<QuesItem> quesItems = JSON.parseObject(examRecord.getOptionList(), new TypeReference<List<QuesItem>>(){});
         int sum = 0;
+        if (answerMap == null){
+            return ApiResponse.ok();
+        }
         for (QuesItem quesItem : quesItems) {
             boolean flag = true;
             String right = quesItem.getRightAnswer();
@@ -181,7 +191,9 @@ public class ExamController extends BaseController {
                 sum++;
             }
         }
-        examRecord.setExamResult(100/quesItems.size()*sum);
+        if (quesItems.size() != 0) {
+            examRecord.setExamResult(100 / quesItems.size() * sum);
+        }
         examRecordService.updateById(examRecord);
         return ApiResponse.ok(examRecord.getExamResult());
     }

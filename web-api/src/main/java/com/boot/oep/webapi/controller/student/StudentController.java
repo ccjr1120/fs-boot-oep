@@ -61,6 +61,10 @@ public class StudentController extends BaseController {
             int wrongSum = 0;
             for (QuesItem quesItem : quesItems) {
                 String right = quesItem.getRightAnswer();
+                if (answerMap == null){
+                    wrongSum = quesItems.size();
+                    break;
+                }
                 List<String> answers = answerMap.get(quesItem.getQuestionId());
                 if (answers == null){
                     wrongSum++;
