@@ -18,11 +18,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.FileSystemUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -44,7 +43,7 @@ public class CommonController extends BaseController{
     @Resource
     private SysUserService sysUserService;
     @Resource
-    private HttpServletRequest request;
+    private PasswordEncoder passwordEncoder;
 
 
     @PostMapping("/curMenus")
@@ -88,6 +87,26 @@ public class CommonController extends BaseController{
         SysUser sysUser = sysUserService.getById(getCurId());
         sysUser.setPassword(null);
         return ApiResponse.ok(sysUser);
+    }
+
+    @PostMapping("/updateUserInfo")
+    public ApiResponse<SysUser> getBaseUserInfo(@RequestBody SysUser sysUser){
+        SysUser sysUserDb = sysUserService.getById(getCurId());
+        sysUserDb.setUsername(sysUser.getUsername());
+        sysUserDb.setName(sysUser.getName());
+        sysUserService.updateById(sysUserDb);
+        return ApiResponse.ok(sysUserDb);
+    }
+
+    @PostMapping("/updatePwd")
+    public ApiResponse<SysUser> updatePwd(@RequestParam("oldPwd") String oldPwd, @RequestParam("newPwd") String newPwd){
+        SysUser sysUser = sysUserService.getById(getCurId());
+        if (passwordEncoder.matches(oldPwd, sysUser.getPassword())){
+            sysUser.setPassword(passwordEncoder.encode(newPwd));
+            sysUserService.updateById(sysUser);
+            return ApiResponse.ok();
+        }
+        return ApiResponse.fail("更新失败，密码不匹配");
     }
 
     @PostMapping("/upload")
