@@ -39,13 +39,16 @@ public class ExamController extends BaseController {
     private ExamRecordService examRecordService;
 
     @PostMapping("/start")
-    public ApiResponse<List<QuesItemVo>> startExam(@RequestParam("key") String key){
+    public synchronized ApiResponse<List<QuesItemVo>> startExam(@RequestParam("key") String key){
         Exam exam = examService.getOne(new QueryWrapper<Exam>().eq("random_str", key));
         if (exam == null){
             return ApiResponse.fail("口令无效");
         }
         if (exam.getState() == 1){
             return ApiResponse.fail("该考试已结束");
+        }
+        if (exam.getPartNum().equals(exam.getPeopleNum())){
+            return ApiResponse.fail("考试人数已满");
         }
         ExamRecord examRecord = examRecordService.getOne(new LambdaQueryWrapper<ExamRecord>()
         .eq(BaseEntity::getCreateId, getCurId()).eq(ExamRecord::getBankId, exam.getId()));
