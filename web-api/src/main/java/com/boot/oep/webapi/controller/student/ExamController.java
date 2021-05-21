@@ -47,7 +47,7 @@ public class ExamController extends BaseController {
         if (exam.getState() == 1){
             return ApiResponse.fail("该考试已结束");
         }
-        if (exam.getPartNum().equals(exam.getPeopleNum())){
+        if (exam.getPartNum() != null && exam.getPartNum().equals(exam.getPeopleNum())){
             return ApiResponse.fail("考试人数已满");
         }
         ExamRecord examRecord = examRecordService.getOne(new LambdaQueryWrapper<ExamRecord>()
@@ -155,7 +155,7 @@ public class ExamController extends BaseController {
     public ApiResponse<String> saveAnswer(@RequestBody AnswerDto dto){
         ExamRecord examRecord = getMyExam();
         Map<String, List<String>> answerMap;
-        if (StrUtil.isNotBlank(examRecord.getAnswers())){
+        if (examRecord.getAnswers() != null && StrUtil.isNotBlank(examRecord.getAnswers())){
             answerMap = JSON.parseObject(examRecord.getAnswers(), new TypeReference<HashMap<String, List<String>>>(){});
         }else{
             answerMap = new HashMap<>(1);

@@ -3,6 +3,7 @@ package com.boot.oep.config;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.boot.oep.security.SecurityUserUtils;
 import org.apache.ibatis.reflection.MetaObject;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -17,8 +18,6 @@ import java.util.Date;
  */
 @Component
 public class MpAutoFillConfig implements MetaObjectHandler {
-    @Resource
-    private HttpServletRequest request;
 
     @Override
     public void insertFill(MetaObject metaObject) {
